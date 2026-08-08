@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
+}
+
+/* App Layout Grid & Spacing - Tightened alignment between sidebar and body */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-wrapper.collapsed {
+  margin-left: 72px;
+}
+
+@media (max-width: 899px) {
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+}
+
+.content-body {
+  flex: 1;
+  padding: 1.25rem 1.5rem; /* Tightened padding for clean gapless transition */
+  margin-top: 68px;
+  width: 100%;
+  max-width: 1600px;
+  margin-left: 0; /* Keep content aligned directly to sidebar without centered gap */
+}
+
+@media (max-width: 600px) {
+  .content-body {
+    padding: 1rem;
+  }
+}
