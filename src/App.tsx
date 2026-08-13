@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './config';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { getMuiTheme } from './theme/muiTheme';
 import { Sidebar } from './components/layout/Sidebar';
@@ -53,9 +55,11 @@ const MainLayout: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AppProvider>
-      <MainLayout />
-    </AppProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppProvider>
+        <MainLayout />
+      </AppProvider>
+    </QueryClientProvider>
   );
 };
 

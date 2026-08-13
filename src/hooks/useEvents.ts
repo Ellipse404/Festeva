@@ -1,17 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useApp } from './useApp';
-import { EventItem } from '../types';
 import { eventsApi } from '../api/eventsApi';
-import { MESSAGES } from '../constants';
 import { useDebounce } from './useDebounce';
 
 export const useEvents = () => {
   const { filters, setFilters, resetFilters, addEvent } = useApp();
-
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(true);
-  const [isApiConnected, setIsApiConnected] = useState<boolean>(false);
-  const [apiError, setApiError] = useState<string | null>(null);
 
   // Debounce search query to prevent excessive API calls while user types
   const debouncedSearchQuery = useDebounce(filters.searchQuery, 350);
@@ -21,31 +15,21 @@ export const useEvents = () => {
     [filters, debouncedSearchQuery],
   );
 
-  // Fetch events directly from Nest Backend API on mount & filter changes
-  const fetchEvents = useCallback(async () => {
-    setIsLoadingEvents(true);
-    setApiError(null);
-    try {
-      const result = await eventsApi.getEvents(activeFilters);
-      setIsApiConnected(result.isConnected);
-      if (result.isConnected) {
-        setEvents(result.data);
-      } else {
-        setEvents([]);
-        setApiError(result.error || MESSAGES.ERRORS.FAILED_TO_CONNECT);
-      }
-    } catch (err: any) {
-      setIsApiConnected(false);
-      setEvents([]);
-      setApiError(err?.message || MESSAGES.ERRORS.FETCH_EVENTS_FAILED);
-    } finally {
-      setIsLoadingEvents(false);
-    }
-  }, [activeFilters]);
+  // TanStack Query for fetching events with caching and background refetching
+  const {
+    data: apiResult,
+    isLoading: isLoadingEvents,
+    error: queryError,
+    refetch: fetchEvents,
+  } = useQuery({
+    queryKey: ['events', activeFilters.category, activeFilters.searchQuery],
+    queryFn: () => eventsApi.getEvents(activeFilters),
+    staleTime: 1000 * 60 * 2,
+  });
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  const events = apiResult?.data || [];
+  const isApiConnected = apiResult?.isConnected ?? false;
+  const apiError = apiResult?.error || (queryError ? String(queryError) : null);
 
   // Filter logic
   const filteredEvents = events.filter((evt) => {
