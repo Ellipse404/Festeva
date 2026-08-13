@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useApp } from '../../hooks/useApp';
-import { EventCategory } from '../../types';
+import React, { useState } from "react";
+import { useApp } from "../../hooks/useApp";
+import { EventCategory } from "../../types";
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import {
   Grid,
   Stack,
   InputAdornment,
-} from '@mui/material';
+} from "@mui/material";
 import {
   AutoAwesome as SparklesIcon,
   AttachMoney as DollarIcon,
@@ -22,33 +22,28 @@ import {
   LocationOn as LocationIcon,
   CheckCircle as CheckIcon,
   ArrowForward as ArrowIcon,
-} from '@mui/icons-material';
-import toast from 'react-hot-toast';
-
-const PRESET_POSTERS = [
-  { label: 'Wedding / Reception', url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80' },
-  { label: 'Rice Ceremony', url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000&q=80' },
-  { label: 'Birthday Celebration', url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1000&q=80' },
-  { label: 'Anniversary Party', url: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&w=1000&q=80' },
-  { label: 'Festival / Concert', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80' },
-];
+} from "@mui/icons-material";
+import { MESSAGES, HOST_CATEGORIES, PRESET_POSTERS } from "../../constants";
+import toast from "react-hot-toast";
 
 export const HostEventForm: React.FC = () => {
   const { addEvent, setActiveNav, user, setIsAuthModalOpen } = useApp();
 
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<Exclude<EventCategory, 'all'>>('birthday');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('18:00');
-  const [locationName, setLocationName] = useState('');
+  const [title, setTitle] = useState("");
+  const [category, setCategory] =
+    useState<Exclude<EventCategory, "all">>("birthday");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("18:00");
+  const [locationName, setLocationName] = useState("");
   const [ticketPrice, setTicketPrice] = useState<number>(0);
   const [totalSeats, setTotalSeats] = useState<number>(100);
   const [posterUrl, setPosterUrl] = useState(PRESET_POSTERS[2].url);
-  const [customPoster, setCustomPoster] = useState('');
+  const [customPoster, setCustomPoster] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user.isLoggedIn) {
@@ -56,59 +51,74 @@ export const HostEventForm: React.FC = () => {
       return;
     }
 
-    const finalPoster = customPoster.trim() !== '' ? customPoster : posterUrl;
+    setIsSubmitting(true);
+    const finalPoster = customPoster.trim() !== "" ? customPoster : posterUrl;
 
-    addEvent({
-      title,
-      category,
-      description,
-      posterUrl: finalPoster,
-      date: date || new Date().toISOString().split('T')[0],
-      time,
-      locationName,
-      ticketPrice: Number(ticketPrice),
-      availableSeats: Number(totalSeats),
-      totalSeats: Number(totalSeats),
-    });
+    try {
+      await addEvent({
+        title,
+        category,
+        description,
+        posterUrl: finalPoster,
+        date: date || new Date().toISOString().split("T")[0],
+        time,
+        locationName,
+        ticketPrice: Number(ticketPrice),
+        availableSeats: Number(totalSeats),
+        totalSeats: Number(totalSeats),
+      });
 
-    setSubmitted(true);
-    setTimeout(() => {
-      setActiveNav('dashboard');
-    }, 1500);
+      setSubmitted(true);
+      setTimeout(() => {
+        setActiveNav("dashboard");
+      }, 1500);
+    } catch (err: any) {
+      toast.error(MESSAGES.TOAST.EVENT_PUBLISH_FAILED(err?.message || err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', py: 2 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: "auto", py: 2 }}>
+      <Box sx={{ textAlign: "center", mb: 4 }}>
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             mb: 1,
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
-          Host Your Event on Festeva
+          {MESSAGES.HOST.HEADER_TITLE}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Set up your event details, set ticket prices, manage seats, and invite guests nearby!
+          {MESSAGES.HOST.HEADER_SUBTITLE}
         </Typography>
       </Box>
 
       {submitted ? (
-        <Paper elevation={2} sx={{ p: 6, textAlign: 'center', borderRadius: 4 }}>
-          <CheckIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+        <Paper
+          elevation={2}
+          sx={{ p: 6, textAlign: "center", borderRadius: 4 }}
+        >
+          <CheckIcon sx={{ fontSize: 64, color: "success.main", mb: 2 }} />
           <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-            Your Event is Live! 🎉
+            {MESSAGES.HOST.SUCCESS_TITLE}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Redirecting you to the dashboard grid...
+            {MESSAGES.HOST.SUCCESS_SUBTITLE}
           </Typography>
         </Paper>
       ) : (
-        <Paper component="form" onSubmit={handleSubmit} elevation={2} sx={{ p: 4, borderRadius: 4 }}>
+        <Paper
+          component="form"
+          onSubmit={handleSubmit}
+          elevation={2}
+          sx={{ p: 4, borderRadius: 4 }}
+        >
           <Grid container spacing={3}>
             {/* Title */}
             <Grid item xs={12}>
@@ -131,11 +141,11 @@ export const HostEventForm: React.FC = () => {
                   label="Event Category"
                   onChange={(e) => setCategory(e.target.value as any)}
                 >
-                  <MenuItem value="birthday">🎂 Birthday Party</MenuItem>
-                  <MenuItem value="reception">💍 Wedding Reception</MenuItem>
-                  <MenuItem value="rice_ceremony">🍚 Rice Ceremony (Annaprashan)</MenuItem>
-                  <MenuItem value="anniversary">🥂 Anniversary Celebration</MenuItem>
-                  <MenuItem value="others">🎈 Others / Special Gatherings</MenuItem>
+                  {HOST_CATEGORIES.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>
+                      {cat.selectLabel}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -151,7 +161,7 @@ export const HostEventForm: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <DollarIcon sx={{ color: 'success.main' }} />
+                      <DollarIcon sx={{ color: "success.main" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -214,7 +224,7 @@ export const HostEventForm: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LocationIcon sx={{ color: '#06b6d4' }} />
+                      <LocationIcon sx={{ color: "#06b6d4" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -238,29 +248,40 @@ export const HostEventForm: React.FC = () => {
             {/* Poster Selection */}
             <Grid item xs={12}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Event Banner / Poster Presets
+                {MESSAGES.HOST.PRESETS_LABEL}
               </Typography>
-              <Stack direction="row" spacing={1.5} sx={{ overflowX: 'auto', pb: 1 }}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{ overflowX: "auto", pb: 1 }}
+              >
                 {PRESET_POSTERS.map((preset, idx) => (
                   <Box
                     key={idx}
                     onClick={() => {
                       setPosterUrl(preset.url);
-                      setCustomPoster('');
+                      setCustomPoster("");
                     }}
                     sx={{
-                      position: 'relative',
+                      position: "relative",
                       width: 120,
                       height: 80,
                       borderRadius: 2,
-                      overflow: 'hidden',
-                      cursor: 'pointer',
+                      overflow: "hidden",
+                      cursor: "pointer",
                       border:
-                        posterUrl === preset.url && !customPoster ? '2px solid #6366f1' : '1px solid rgba(0,0,0,0.1)',
+                        posterUrl === preset.url && !customPoster
+                          ? "2px solid #6366f1"
+                          : "1px solid rgba(0,0,0,0.1)",
                       flexShrink: 0,
                     }}
                   >
-                    <Box component="img" src={preset.url} alt={preset.label} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Box
+                      component="img"
+                      src={preset.url}
+                      alt={preset.label}
+                      sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   </Box>
                 ))}
               </Stack>
@@ -283,11 +304,14 @@ export const HostEventForm: React.FC = () => {
                 color="primary"
                 fullWidth
                 size="large"
+                disabled={isSubmitting}
                 startIcon={<SparklesIcon />}
                 endIcon={<ArrowIcon />}
-                sx={{ py: 1.5, fontWeight: 700, fontSize: '1.05rem' }}
+                sx={{ py: 1.5, fontWeight: 700, fontSize: "1.05rem" }}
               >
-                Publish & Host Event
+                {isSubmitting
+                  ? MESSAGES.HOST.SUBMIT_LOADING
+                  : MESSAGES.HOST.SUBMIT_BUTTON}
               </Button>
             </Grid>
           </Grid>
