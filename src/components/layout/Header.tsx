@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useApp } from '../../hooks/useApp';
+import React, { useState, useEffect } from 'react';
+import { useApp, useDebouncedCallback } from '../../hooks';
 import { HeaderProps } from '../../types';
 import {
   AppBar,
@@ -27,6 +27,8 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 
+
+
 export const Header: React.FC<HeaderProps> = ({
   sidebarCollapsed,
   isFilterOpen,
@@ -35,6 +37,25 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user, logout, activeNav, setActiveNav, filters, setFilters, setIsAuthModalOpen, setAuthModalMode, themeMode, toggleTheme } = useApp();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Local state for instant input feedback without typing lag
+  const [searchInput, setSearchInput] = useState<string>(filters.searchQuery);
+
+  // Sync local state if filters reset externally
+  useEffect(() => {
+    setSearchInput(filters.searchQuery);
+  }, [filters.searchQuery]);
+
+  // Debounced callback to update global search filter after 300ms pause
+  const debouncedSetFilter = useDebouncedCallback((query: string) => {
+    setFilters((prev) => ({ ...prev, searchQuery: query }));
+  }, 300);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchInput(val);
+    debouncedSetFilter(val);
+  };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -81,8 +102,8 @@ export const Header: React.FC<HeaderProps> = ({
             fullWidth
             size="small"
             placeholder="Search events by title, venue, host..."
-            value={filters.searchQuery}
-            onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
+            value={searchInput}
+            onChange={handleSearchChange}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

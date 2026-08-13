@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import confetti from 'canvas-confetti';
 import toast from 'react-hot-toast';
+import { MESSAGES, REGEX } from '../../constants';
 
 export const EventDetailModal: React.FC = () => {
   const { selectedEvent, setSelectedEvent, buyTicket, user, setIsAuthModalOpen, setActiveNav } = useApp();
@@ -49,11 +50,11 @@ export const EventDetailModal: React.FC = () => {
     }
 
     if (quantity > selectedEvent.availableSeats) {
-      toast.error(`Only ${selectedEvent.availableSeats} seats remaining!`);
+      toast.error(MESSAGES.TOAST.SEATS_REMAINING_ERROR(selectedEvent.availableSeats));
       return;
     }
 
-    const ticket = buyTicket(selectedEvent.id, quantity);
+    const ticket = buyTicket(selectedEvent.id, quantity, selectedEvent);
     if (ticket) {
       setIsPurchased(true);
       confetti({
@@ -71,6 +72,17 @@ export const EventDetailModal: React.FC = () => {
   };
 
   const totalCost = selectedEvent.ticketPrice * quantity;
+
+  const ticketSummaryItems = [
+    { label: 'Date & Time:', value: `${formattedDate} at ${selectedEvent.time}` },
+    { label: 'Venue:', value: selectedEvent.locationName },
+  ];
+
+  const eventMetaItems = [
+    { icon: <CalendarIcon color="primary" />, label: 'Date', value: formattedDate },
+    { icon: <ClockIcon color="secondary" />, label: 'Time', value: `${selectedEvent.time} GMT` },
+    { icon: <LocationIcon sx={{ color: '#06b6d4' }} />, label: 'Proximity', value: formatDistance(selectedEvent.distanceKm) },
+  ];
 
   return (
     <Dialog
@@ -104,10 +116,10 @@ export const EventDetailModal: React.FC = () => {
         <Box sx={{ p: 4, textAlign: 'center' }}>
           <CheckIcon sx={{ fontSize: 72, color: 'success.main', mb: 2 }} />
           <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-            Ticket Reserved Successfully! 🎉
+            {MESSAGES.TICKET_MODAL.SUCCESS_TITLE}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            You have secured <strong>{quantity} x ticket(s)</strong> for <strong>{selectedEvent.title}</strong>.
+            {MESSAGES.TICKET_MODAL.SUCCESS_SUBTITLE(quantity, selectedEvent.title)}
           </Typography>
 
           <Paper
@@ -124,22 +136,16 @@ export const EventDetailModal: React.FC = () => {
             }}
           >
             <Stack spacing={1.5}>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2" color="text.secondary">
-                  Date & Time:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {formattedDate} at {selectedEvent.time}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2" color="text.secondary">
-                  Venue:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {selectedEvent.locationName}
-                </Typography>
-              </Stack>
+              {ticketSummaryItems.map((item, idx) => (
+                <Stack key={idx} direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">
+                    {item.label}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {item.value}
+                  </Typography>
+                </Stack>
+              ))}
               <Divider />
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">
@@ -161,10 +167,10 @@ export const EventDetailModal: React.FC = () => {
                 setActiveNav('attend');
               }}
             >
-              View in My Tickets
+              {MESSAGES.TICKET_MODAL.VIEW_IN_MY_TICKETS}
             </Button>
             <Button variant="outlined" color="inherit" onClick={handleClose}>
-              Browse More Events
+              {MESSAGES.TICKET_MODAL.BROWSE_MORE}
             </Button>
           </Stack>
         </Box>
@@ -187,7 +193,7 @@ export const EventDetailModal: React.FC = () => {
             />
             <Box sx={{ position: 'absolute', bottom: 20, left: 24, right: 24 }}>
               <Chip
-                label={selectedEvent.category.replace('_', ' ')}
+                label={selectedEvent.category.replace(REGEX.UNDERSCORE_GLOBAL, ' ')}
                 color="secondary"
                 size="small"
                 sx={{ fontWeight: 700, mb: 1, textTransform: 'capitalize' }}
@@ -212,41 +218,19 @@ export const EventDetailModal: React.FC = () => {
                 gap: 2,
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <CalendarIcon color="primary" />
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Date
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {formattedDate}
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <ClockIcon color="secondary" />
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Time
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {selectedEvent.time} GMT
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <LocationIcon sx={{ color: '#06b6d4' }} />
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Proximity
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {formatDistance(selectedEvent.distanceKm)}
-                  </Typography>
-                </Box>
-              </Stack>
+              {eventMetaItems.map((meta, idx) => (
+                <Stack key={idx} direction="row" alignItems="center" spacing={1.5}>
+                  {meta.icon}
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {meta.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {meta.value}
+                    </Typography>
+                  </Box>
+                </Stack>
+              ))}
             </Paper>
 
             {/* Description & Host */}
@@ -344,8 +328,8 @@ export const EventDetailModal: React.FC = () => {
                   sx={{ py: 1.2, fontWeight: 700 }}
                 >
                   {selectedEvent.availableSeats === 0
-                    ? 'Sold Out'
-                    : `Buy ${quantity} Ticket(s) • ${formatCurrency(totalCost)}`}
+                    ? MESSAGES.TICKET_MODAL.SOLD_OUT
+                    : MESSAGES.TICKET_MODAL.BUY_BUTTON(quantity, formatCurrency(totalCost))}
                 </Button>
               </Stack>
             </Paper>
