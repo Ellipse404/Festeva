@@ -10,6 +10,8 @@ import { Footer } from './components/layout/Footer';
 import { EventDetailModal } from './components/events/EventDetailModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { AppRoutes } from './routes';
+import { ProtectedRoute } from './routes/ProtectedRoute';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const MainLayout: React.FC = () => {
   const { themeMode } = useApp();
@@ -53,13 +55,21 @@ const MainLayout: React.FC = () => {
   );
 };
 
+
+const googleClientId =
+  (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <MainLayout />
-      </AppProvider>
-    </QueryClientProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        </AppProvider>
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 };
 

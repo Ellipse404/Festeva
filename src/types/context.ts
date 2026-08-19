@@ -1,4 +1,4 @@
-import { UserProfile } from "./user";
+import { UserProfile, AuthProvider, SocialProvider } from "./user";
 import { EventItem, FilterOptions } from "./events";
 import { Ticket } from "./tickets";
 import { NavView } from "./index";
@@ -9,10 +9,21 @@ export interface AppContextType {
 
   user: UserProfile;
   loginWithProvider: (
-    provider: "google" | "meta" | "email",
+    provider: AuthProvider,
     email?: string,
     name?: string,
-  ) => void;
+  ) => Promise<void>;
+  registerUser: (name: string, email: string, password: string) => Promise<void>;
+  loginUser: (email: string, password: string) => Promise<void>;
+  loginWithGoogleToken: (idToken: string) => Promise<void>;
+  loginWithFacebookToken: (accessToken: string) => Promise<void>;
+  socialLoginUser: (
+    provider: SocialProvider,
+    email: string,
+    name: string,
+    avatar?: string,
+    providerId?: string,
+  ) => Promise<void>;
   logout: () => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
 

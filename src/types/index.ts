@@ -2,6 +2,7 @@ export * from './common';
 export * from './events';
 export * from './tickets';
 export * from './user';
+export * from './auth';
 export * from './components';
 export * from './routes';
 export * from './api';

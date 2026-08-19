@@ -13,9 +13,12 @@ import {
   FilterOptions,
   NavView,
   AppContextType,
+  SocialProvider,
+  AuthProvider,
 } from "../types";
 import { INITIAL_MOCK_EVENTS } from "../data/mockEvents";
 import { eventsApi } from "../api/eventsApi";
+import { authApi } from "../api/authApi";
 import { MESSAGES } from "../constants";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -26,8 +29,8 @@ const DEFAULT_USER: UserProfile = {
   avatar:
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
   location: "Downtown City Center",
-  isLoggedIn: true,
-  provider: "google",
+  isLoggedIn: false,
+  provider: "email",
 };
 
 const DEFAULT_FILTERS: FilterOptions = {
@@ -69,6 +72,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     return saved ? JSON.parse(saved) : DEFAULT_USER;
   });
 
+  // Load User Profile from JWT token on initial load
+  useEffect(() => {
+    const token = localStorage.getItem("festeva_token");
+    if (token) {
+      authApi
+        .getProfile()
+        .then((profile) => {
+          setUser({
+            ...profile,
+            isLoggedIn: true,
+            accessToken: token,
+          });
+        })
+        .catch(() => {
+          localStorage.removeItem("festeva_token");
+          setUser(DEFAULT_USER);
+        });
+    }
+  }, []);
+
   // Tickets State
   const [tickets, setTickets] = useState<Ticket[]>(() => {
     const saved = localStorage.getItem("festeva_tickets");
@@ -92,32 +115,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem("festeva_tickets", JSON.stringify(tickets));
   }, [tickets]);
 
-  const loginWithProvider = (
-    provider: "google" | "meta" | "email",
-    email?: string,
-    name?: string,
-  ) => {
-    const updated: UserProfile = {
-      id: `usr-${Date.now()}`,
-      name:
-        name ||
-        (provider === "google"
-          ? "Google User"
-          : provider === "meta"
-            ? "Meta User"
-            : "Festeva Member"),
-      email: email || `${provider}.user@festeva.com`,
-      avatar:
-        provider === "google"
-          ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80"
-          : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
-      location: "Central Metro Hub",
+  const handleAuthSuccess = (accessToken: string, userData: any) => {
+    localStorage.setItem("festeva_token", accessToken);
+    const updatedUser: UserProfile = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      avatar: userData.avatar || DEFAULT_USER.avatar,
+      provider: userData.provider || "email",
       isLoggedIn: true,
-      provider,
+      accessToken,
     };
-    setUser(updated);
+    setUser(updatedUser);
     setIsAuthModalOpen(false);
-    toast.success(MESSAGES.TOAST.WELCOME_USER(updated.name), {
+    toast.success(MESSAGES.TOAST.WELCOME_USER(updatedUser.name), {
       style: {
         background: themeMode === "dark" ? "#151c2e" : "#ffffff",
         color: themeMode === "dark" ? "#f8fafc" : "#0f172a",
@@ -125,8 +136,53 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
+  const registerUser = async (name: string, email: string, password: string) => {
+    const res = await authApi.register(name, email, password);
+    handleAuthSuccess(res.accessToken, res.user);
+  };
+
+  const loginUser = async (email: string, password: string) => {
+    const res = await authApi.login(email, password);
+    handleAuthSuccess(res.accessToken, res.user);
+  };
+
+  const loginWithGoogleToken = async (idToken: string) => {
+    const res = await authApi.googleLogin(idToken);
+    handleAuthSuccess(res.accessToken, res.user);
+  };
+
+  const loginWithFacebookToken = async (accessToken: string) => {
+    const res = await authApi.facebookLogin(accessToken);
+    handleAuthSuccess(res.accessToken, res.user);
+  };
+
+  const socialLoginUser = async (
+    provider: SocialProvider,
+    email: string,
+    name: string,
+    avatar?: string,
+    providerId?: string,
+  ) => {
+    const res = await authApi.socialLogin(provider, email, name, avatar, providerId);
+    handleAuthSuccess(res.accessToken, res.user);
+  };
+
+  const loginWithProvider = async (
+    provider: AuthProvider,
+    email?: string,
+    name?: string,
+  ) => {
+    const targetProvider: SocialProvider =
+      provider === "meta" ? "facebook" : provider === "email" ? "google" : (provider as SocialProvider);
+    const targetEmail = email || `user.${Date.now()}@${targetProvider}.com`;
+    const targetName = name || `${targetProvider.toUpperCase()} User`;
+
+    await socialLoginUser(targetProvider, targetEmail, targetName);
+  };
+
   const logout = () => {
-    setUser({ ...DEFAULT_USER, isLoggedIn: false });
+    localStorage.removeItem("festeva_token");
+    setUser(DEFAULT_USER);
     toast.success(MESSAGES.TOAST.LOGOUT_SUCCESS, {
       style: {
         background: themeMode === "dark" ? "#151c2e" : "#ffffff",
@@ -205,6 +261,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         toggleTheme,
         user,
         loginWithProvider,
+        registerUser,
+        loginUser,
+        loginWithGoogleToken,
+        loginWithFacebookToken,
+        socialLoginUser,
         logout,
         updateUserProfile,
         addEvent,

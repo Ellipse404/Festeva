@@ -9,6 +9,17 @@ export const axiosClient: AxiosInstance = axios.create({
   },
 });
 
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('festeva_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
