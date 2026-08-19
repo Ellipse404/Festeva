@@ -1,14 +1,14 @@
 import React from 'react';
-import { DashboardPage } from '../pages/DashboardPage';
+import { LoginPage } from '../pages/LoginPage';
 
 export interface RouteConfig {
   path: string;
-  component: React.ComponentType<{ isFilterOpen: boolean }>;
+  component: React.ComponentType<any>;
 }
 
 export const publicRoutes: RouteConfig[] = [
   {
-    path: 'dashboard',
-    component: DashboardPage,
+    path: 'login',
+    component: LoginPage,
   },
 ];

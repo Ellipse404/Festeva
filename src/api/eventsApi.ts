@@ -1,5 +1,6 @@
 import { EventItem, FilterOptions, ApiFetchResult } from "../types";
-import { ENDPOINTS, MESSAGES } from "../constants";
+import { MESSAGES } from "../constants";
+import { axiosClient } from "../config";
 
 export const eventsApi = {
   /**
@@ -9,33 +10,18 @@ export const eventsApi = {
     filters?: FilterOptions,
   ): Promise<ApiFetchResult<EventItem[]>> {
     try {
-      const params = new URLSearchParams();
+      const params: Record<string, string> = {};
       if (filters?.category && filters.category !== "all") {
-        params.append("category", filters.category);
+        params.category = filters.category;
       }
       if (filters?.searchQuery) {
-        params.append("searchQuery", filters.searchQuery);
+        params.searchQuery = filters.searchQuery;
       }
 
-      const queryString = params.toString();
-      const url = `${ENDPOINTS.EVENTS}${queryString ? `?${queryString}` : ""}`;
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(MESSAGES.ERRORS.SERVER_ERROR(response.status, errorText));
-      }
-
-      const data = await response.json();
-      return { data: Array.isArray(data) ? data : [], isConnected: true };
+      const response = await axiosClient.get<EventItem[]>("/events", { params });
+      return { data: Array.isArray(response.data) ? response.data : [], isConnected: true };
     } catch (err: any) {
-      console.error("❌ Nest API fetch failed:", err?.message || err);
+      console.error("❌ Nest Axios API fetch failed:", err?.message || err);
       return {
         data: [],
         isConnected: false,
@@ -69,32 +55,15 @@ export const eventsApi = {
       longitude: (eventData as any).longitude ?? 77.5946,
     };
 
-    const response = await fetch(ENDPOINTS.EVENTS, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(MESSAGES.ERRORS.CREATE_EVENT_FAILED(response.status, errorText));
-    }
-
-    const createdEvent: EventItem = await response.json();
-    return { data: createdEvent, isConnected: true };
+    const response = await axiosClient.post<EventItem>("/events", payload);
+    return { data: response.data, isConnected: true };
   },
 
   /**
    * Fetch single event details by ID
    */
   async getEventById(id: string): Promise<ApiFetchResult<EventItem | null>> {
-    const response = await fetch(ENDPOINTS.EVENT_BY_ID(id));
-    if (!response.ok) {
-      throw new Error(MESSAGES.ERRORS.EVENT_NOT_FOUND(id));
-    }
-    const data = await response.json();
-    return { data, isConnected: true };
+    const response = await axiosClient.get<EventItem>(`/events/${id}`);
+    return { data: response.data, isConnected: true };
   },
 };
