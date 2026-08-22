@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useEvents, useThrottledCallback } from "../../hooks";
-import { EventCategory, DashboardProps } from "../../types";
+import { EventCategory, IDashboardProps } from "../../types";
 import { EventCard } from "./EventCard";
 import { MESSAGES, CATEGORIES } from "../../constants";
 import {
@@ -22,7 +22,7 @@ import {
   CancelOutlined as CancelIcon,
 } from "@mui/icons-material";
 
-export const Dashboard: React.FC<DashboardProps> = ({ isFilterOpen }) => {
+export const Dashboard: React.FC<IDashboardProps> = ({ isFilterOpen }) => {
   const {
     events: sortedEvents,
     isLoadingEvents,

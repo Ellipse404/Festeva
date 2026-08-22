@@ -1,15 +1,10 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
+import { IBadgeProps } from '../../types';
 import { formatCategoryLabel } from '../../utils/formatters';
 import { formatDistance } from '../../utils/distance';
 
-interface BadgeProps {
-  type: 'distance' | 'category' | 'price';
-  value: string | number;
-  paid?: boolean;
-}
-
-export const Badge: React.FC<BadgeProps> = ({ type, value, paid }) => {
+export const Badge: React.FC<IBadgeProps> = ({ type, value, paid }) => {
   if (type === 'distance') {
     return (
       <div className="distance-badge" title="Distance from your location">

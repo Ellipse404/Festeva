@@ -1,4 +1,4 @@
-export interface VerificationDetails {
+export interface IVerificationDetails {
   verifiedAt: string;
   ocrConfidence: number;
   extractedAadhaar: string;
@@ -7,15 +7,15 @@ export interface VerificationDetails {
   livenessPassed: boolean;
 }
 
-export interface VerificationResponse {
+export interface IVerificationResponse {
   success: boolean;
   isVerified: boolean;
   aadhaarNumber: string;
   message: string;
-  details?: VerificationDetails;
+  details?: IVerificationDetails;
 }
 
-export interface IdentityVerificationModalProps {
+export interface IIdentityVerificationModalProps {
   open?: boolean;
   onClose?: () => void;
 }

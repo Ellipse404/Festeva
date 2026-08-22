@@ -1,13 +1,13 @@
-import { UserProfile, AuthProvider, SocialProvider } from "./user";
-import { EventItem, FilterOptions } from "./events";
-import { Ticket } from "./tickets";
+import { IUserProfile, AuthProvider, SocialProvider } from "./user";
+import { IEventItem, IFilterOptions } from "./events";
+import { ITicket } from "./tickets";
 import { NavView } from "./index";
 
-export interface AppContextType {
+export interface IAppContextType {
   themeMode: "light" | "dark";
   toggleTheme: () => void;
 
-  user: UserProfile;
+  user: IUserProfile;
   loginWithProvider: (
     provider: AuthProvider,
     email?: string,
@@ -25,11 +25,11 @@ export interface AppContextType {
     providerId?: string,
   ) => Promise<void>;
   logout: () => void;
-  updateUserProfile: (updates: Partial<UserProfile>) => void;
+  updateUserProfile: (updates: Partial<IUserProfile>) => void;
 
   addEvent: (
     eventData: Omit<
-      EventItem,
+      IEventItem,
       | "id"
       | "createdAt"
       | "distanceKm"
@@ -37,24 +37,24 @@ export interface AppContextType {
       | "hostAvatar"
       | "hostEmail"
     >,
-  ) => Promise<EventItem>;
+  ) => Promise<IEventItem>;
 
-  tickets: Ticket[];
+  tickets: ITicket[];
   buyTicket: (
     eventId: string,
     quantity: number,
-    targetEvent?: EventItem | null,
-  ) => Ticket | null;
+    targetEvent?: IEventItem | null,
+  ) => ITicket | null;
 
   activeNav: NavView;
   setActiveNav: (nav: NavView) => void;
 
-  filters: FilterOptions;
-  setFilters: React.Dispatch<React.SetStateAction<FilterOptions>>;
+  filters: IFilterOptions;
+  setFilters: React.Dispatch<React.SetStateAction<IFilterOptions>>;
   resetFilters: () => void;
 
-  selectedEvent: EventItem | null;
-  setSelectedEvent: (event: EventItem | null) => void;
+  selectedEvent: IEventItem | null;
+  setSelectedEvent: (event: IEventItem | null) => void;
 
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;

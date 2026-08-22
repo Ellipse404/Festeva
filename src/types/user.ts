@@ -8,7 +8,7 @@ export type SocialProvider = 'google' | 'facebook' | 'gmail';
 export type AuthProvider = SocialProvider | 'meta' | 'email';
 export type AuthMode = 'login' | 'register' | 'forgot';
 
-export interface UserProfile {
+export interface IUserProfile {
   id: string;
   name: string;
   email: string;

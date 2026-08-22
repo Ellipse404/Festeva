@@ -1,26 +1,25 @@
 import { axiosClient } from '../config';
-import { VerificationResponse } from '../types';
+import { IVerificationResponse } from '../types';
+import { ENDPOINTS } from '../constants';
 
 export const verificationApi = {
-
+  /**
+   * Verify identity by uploading Aadhaar Card image and Live Selfie image
+   */
   async verifyIdentity(
     aadhaarImage: string,
     selfieImage: string,
     userEmail?: string,
     userId?: string,
-  ): Promise<VerificationResponse> {
-    const token = localStorage.getItem('festeva_token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-    const response = await axiosClient.post<VerificationResponse>(
-      '/verification/verify-identity',
+  ): Promise<IVerificationResponse> {
+    const response = await axiosClient.post<IVerificationResponse>(
+      ENDPOINTS.VERIFICATION.VERIFY,
       {
         aadhaarImage,
         selfieImage,
         userEmail,
         userId,
       },
-      { headers },
     );
     return response.data;
   },

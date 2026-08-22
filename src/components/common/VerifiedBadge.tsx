@@ -1,8 +1,8 @@
 import React from 'react';
 import { Tooltip } from '@mui/material';
-import { VerifiedBadgeProps } from '../../types';
+import { IVerifiedBadgeProps } from '../../types';
 
-export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
+export const VerifiedBadge: React.FC<IVerifiedBadgeProps> = ({
   size = 18,
   title = 'Verified Identity',
   className = '',

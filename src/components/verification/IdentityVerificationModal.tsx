@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
-import { FILE_CONSTRAINTS, CAMERA_CONFIG } from '../../constants';
-import { IdentityVerificationModalProps } from '../../types';
+import { MESSAGES, FILE_CONSTRAINTS, CAMERA_CONFIG } from '../../constants';
+import { IIdentityVerificationModalProps } from '../../types';
 import { compressImage } from '../../utils';
 import {
   Dialog,
@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
-export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = () => {
+export const IdentityVerificationModal: React.FC<IIdentityVerificationModalProps> = () => {
   const {
     isVerificationModalOpen,
     setIsVerificationModalOpen,
@@ -68,7 +68,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
       streamRef.current = stream;
       setCameraActive(true);
     } catch (err) {
-      toast.error('Unable to access camera. Please upload an image file instead.');
+      toast.error(MESSAGES.TOAST.CAMERA_ACCESS_ERROR);
       setCameraActive(false);
     }
   };
@@ -98,7 +98,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
   // Capture frame from active video element
   const capturePhoto = async (type: 'aadhaar' | 'selfie') => {
     if (!videoRef.current || videoRef.current.videoWidth === 0) {
-      toast.error('Camera video stream is initializing. Please wait a moment.');
+      toast.error(MESSAGES.TOAST.CAMERA_INITIALIZING);
       return;
     }
 
@@ -130,14 +130,14 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
     const isValidExt = FILE_CONSTRAINTS.ALLOWED_EXTENSIONS.some((ext) => fileName.endsWith(ext));
 
     if (!FILE_CONSTRAINTS.ALLOWED_MIME_TYPES.includes(fileType as any) && !isValidExt) {
-      toast.error('Only JPG, JPEG, and PNG image files are allowed.');
+      toast.error(MESSAGES.TOAST.INVALID_FILE_TYPE);
       e.target.value = '';
       return;
     }
 
     // 2. Validate File Size (Maximum 5MB)
     if (file.size > FILE_CONSTRAINTS.MAX_FILE_SIZE_BYTES) {
-      toast.error('File size exceeds the 5MB limit. Please upload a smaller image.');
+      toast.error(MESSAGES.TOAST.FILE_SIZE_EXCEEDED);
       e.target.value = '';
       return;
     }
@@ -151,7 +151,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
       } else {
         setSelfieImage(compressed);
       }
-      toast.success(`${type === 'aadhaar' ? 'Aadhaar Card' : 'Selfie'} image uploaded successfully!`);
+      toast.success(MESSAGES.TOAST.IMAGE_UPLOAD_SUCCESS(type === 'aadhaar' ? 'Aadhaar Card' : 'Selfie'));
     };
     reader.readAsDataURL(file);
   };
@@ -167,7 +167,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
       await verifyUserIdentity(aadhaarImage, selfieImage);
       setVerificationSuccess(true);
       setVerifiedAadhaar(user.aadhaarNumber || 'XXXX XXXX 8892');
-      toast.success('Identity Verified! You can now host & attend events.');
+      toast.success(MESSAGES.TOAST.VERIFICATION_SUCCESS);
     } catch (err: any) {
       toast.error(err?.message || 'Verification failed. Please retry.');
     } finally {
@@ -202,14 +202,14 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
         <div className="text-center mb-6">
           <Chip
             icon={<ShieldIcon style={{ width: 16, height: 16, color: '#c084fc' }} />}
-            label="One-Time Verification Required"
+            label={MESSAGES.VERIFICATION.CHIP_LABEL}
             className="bg-purple-500/15 text-purple-300 border border-purple-500/30 font-bold mb-3"
           />
           <Typography variant="h5" className="font-extrabold mb-1 text-white">
-            Verify Your Identity
+            {MESSAGES.VERIFICATION.TITLE}
           </Typography>
           <Typography variant="caption" className="text-slate-400">
-            Verify once to unlock hosting & ticket purchases for all events.
+            {MESSAGES.VERIFICATION.SUBTITLE}
           </Typography>
         </div>
 
@@ -218,10 +218,10 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
           <div className="text-center py-4">
             <CheckIcon className="text-emerald-400 text-6xl mb-4" />
             <Typography variant="h6" className="font-extrabold mb-2 text-white">
-              Identity Successfully Verified!
+              {MESSAGES.VERIFICATION.SUCCESS_TITLE}
             </Typography>
             <Typography variant="body2" className="text-slate-300 mb-6">
-              Your Aadhaar details & selfie have been authenticated.
+              {MESSAGES.VERIFICATION.SUCCESS_SUBTITLE}
             </Typography>
 
             <div className="p-4 mb-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left">
@@ -244,7 +244,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
               onClick={handleClose}
               className="py-3 font-extrabold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
             >
-              Continue to Festeva
+              {MESSAGES.VERIFICATION.CONTINUE_BUTTON}
             </Button>
           </div>
         ) : isVerifying ? (
@@ -252,24 +252,24 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
           <div className="text-center py-8">
             <CircularProgress size={56} className="text-purple-500 mb-6" />
             <Typography variant="h6" className="font-extrabold mb-2 text-white">
-              Analyzing Identity Credentials...
+              {MESSAGES.VERIFICATION.ANALYZING_TITLE}
             </Typography>
             <Typography variant="caption" className="text-slate-300 block mb-6">
-              Running Tesseract OCR, QR Code Reader, Face Match & Liveness Inspection.
+              {MESSAGES.VERIFICATION.ANALYZING_SUBTITLE}
             </Typography>
 
             <div className="flex flex-col gap-3 text-left max-w-xs mx-auto">
               <div className="flex items-center gap-3">
                 <BadgeIcon className="text-indigo-400 text-xl" />
-                <span className="text-sm text-slate-300">Extracting 12-Digit Aadhaar Text (OCR)</span>
+                <span className="text-sm text-slate-300">{MESSAGES.VERIFICATION.STEP_OCR}</span>
               </div>
               <div className="flex items-center gap-3">
                 <QrIcon className="text-purple-400 text-xl" />
-                <span className="text-sm text-slate-300">Scanning Secure Aadhaar QR Code</span>
+                <span className="text-sm text-slate-300">{MESSAGES.VERIFICATION.STEP_QR}</span>
               </div>
               <div className="flex items-center gap-3">
                 <FaceIcon className="text-pink-400 text-xl" />
-                <span className="text-sm text-slate-300">Matching Selfie Face against Aadhaar Photo</span>
+                <span className="text-sm text-slate-300">{MESSAGES.VERIFICATION.STEP_FACE}</span>
               </div>
             </div>
 
@@ -290,7 +290,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                 }}
                 className="rounded-xl capitalize font-bold py-2"
               >
-                1. Aadhaar Card
+                {MESSAGES.VERIFICATION.TAB_AADHAAR}
               </Button>
               <Button
                 variant={step === 2 ? 'contained' : 'outlined'}
@@ -302,7 +302,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                 }}
                 className="rounded-xl capitalize font-bold py-2"
               >
-                2. Live Selfie
+                {MESSAGES.VERIFICATION.TAB_SELFIE}
               </Button>
             </div>
 
@@ -310,7 +310,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
               /* Step 1: Aadhaar Card Capture */
               <div>
                 <Typography variant="subtitle2" className="font-bold mb-2 text-slate-200">
-                  Capture or Upload Front of Aadhaar Card (Max 5MB, JPG/PNG)
+                  {MESSAGES.VERIFICATION.AADHAAR_LABEL}
                 </Typography>
 
                 {aadhaarImage ? (
@@ -348,10 +348,10 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                       <div className="p-8 text-center rounded-2xl border-2 border-dashed border-white/20 bg-slate-950/60 mb-4">
                         <BadgeIcon className="text-5xl text-purple-400 mb-2" />
                         <p className="text-sm text-slate-300 mb-1">
-                          Position Aadhaar card inside camera view or upload file
+                          {MESSAGES.VERIFICATION.AADHAAR_INSTRUCTIONS}
                         </p>
                         <p className="text-xs text-slate-400 mb-4">
-                          Supported formats: JPG, JPEG, PNG (Max 5MB)
+                          {MESSAGES.VERIFICATION.FORMAT_SUBTITLE}
                         </p>
                         <div className="flex justify-center gap-3">
                           <Button variant="contained" startIcon={<CameraIcon />} onClick={startCamera} className="font-bold">
@@ -382,14 +382,14 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                   }}
                   className="py-3 font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md"
                 >
-                  Next: Capture Live Selfie
+                  {MESSAGES.VERIFICATION.NEXT_SELFIE}
                 </Button>
               </div>
             ) : (
               /* Step 2: Live Selfie Capture */
               <div>
                 <Typography variant="subtitle2" className="font-bold mb-2 text-slate-200">
-                  Capture Live Selfie Photo (Max 5MB, JPG/PNG)
+                  {MESSAGES.VERIFICATION.SELFIE_LABEL}
                 </Typography>
 
                 {selfieImage ? (
@@ -427,10 +427,10 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                       <div className="p-8 text-center rounded-2xl border-2 border-dashed border-white/20 bg-slate-950/60 mb-4">
                         <FaceIcon className="text-5xl text-pink-400 mb-2" />
                         <p className="text-sm text-slate-300 mb-1">
-                          Look directly at camera in good lighting
+                          {MESSAGES.VERIFICATION.SELFIE_INSTRUCTIONS}
                         </p>
                         <p className="text-xs text-slate-400 mb-4">
-                          Supported formats: JPG, JPEG, PNG (Max 5MB)
+                          {MESSAGES.VERIFICATION.FORMAT_SUBTITLE}
                         </p>
                         <div className="flex justify-center gap-3">
                           <Button variant="contained" startIcon={<CameraIcon />} onClick={startCamera} className="font-bold">
@@ -458,7 +458,7 @@ export const IdentityVerificationModal: React.FC<IdentityVerificationModalProps>
                   onClick={handleSubmitVerification}
                   className="py-3 font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 shadow-xl"
                 >
-                  Submit & Verify Identity
+                  {MESSAGES.VERIFICATION.SUBMIT_VERIFY}
                 </Button>
               </div>
             )}

@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import { API_BASE_URL } from '../constants';
+import { storage } from '../utils';
 
 export const axiosClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000, // 60s timeout for heavy requests (e.g. OCR)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,7 +12,7 @@ export const axiosClient: AxiosInstance = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('festeva_token');
+    const token = storage.get<string>('festeva_token', 'local');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

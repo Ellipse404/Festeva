@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp, useDebouncedCallback } from '../../hooks';
-import { HeaderProps } from '../../types';
+import { IHeaderProps } from '../../types';
 import { VerifiedBadge } from '../common/VerifiedBadge';
 import {
   AppBar,
@@ -28,7 +28,7 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 
-export const Header: React.FC<HeaderProps> = ({
+export const Header: React.FC<IHeaderProps> = ({
   sidebarCollapsed,
   isFilterOpen,
   setIsFilterOpen,

@@ -1,54 +1,53 @@
-import { EventItem } from './events';
-import { NavView } from './index';
+import { IEventItem } from './events';
 
-export interface HeaderProps {
+export interface IHeaderProps {
   sidebarCollapsed: boolean;
   isFilterOpen: boolean;
   setIsFilterOpen: (open: boolean) => void;
   setMobileOpen: (open: boolean) => void;
 }
 
-export interface SidebarProps {
+export interface ISidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
 }
 
-export interface EventCardProps {
-  event: EventItem;
+export interface IEventCardProps {
+  event: IEventItem;
 }
 
-export interface DashboardProps {
+export interface IDashboardProps {
   isFilterOpen: boolean;
 }
 
-export interface BadgeProps {
+export interface IBadgeProps {
   type: 'distance' | 'category' | 'price';
   value: string | number;
   paid?: boolean;
 }
 
-export interface VerifiedBadgeProps {
+export interface IVerifiedBadgeProps {
   size?: number;
   title?: string;
   className?: string;
 }
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'host' | 'attend' | 'chip' | 'social' | 'close';
   children: React.ReactNode;
 }
 
-export interface AppRoutesProps {
+export interface IAppRoutesProps {
   isFilterOpen: boolean;
 }
 
-export interface DashboardPageProps {
+export interface IDashboardPageProps {
   isFilterOpen: boolean;
 }
 
-export interface ThemeContextType {
+export interface IThemeContextType {
   themeMode: 'light' | 'dark';
   toggleTheme: () => void;
 }
