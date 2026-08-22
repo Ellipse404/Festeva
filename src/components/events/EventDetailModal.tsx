@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../hooks/useApp';
+import { VerifiedBadge } from '../common/VerifiedBadge';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import { formatDistance } from '../../utils/distance';
 import {
@@ -30,7 +31,7 @@ import toast from 'react-hot-toast';
 import { MESSAGES, REGEX } from '../../constants';
 
 export const EventDetailModal: React.FC = () => {
-  const { selectedEvent, setSelectedEvent, buyTicket, user, setIsAuthModalOpen, setActiveNav } = useApp();
+  const { selectedEvent, setSelectedEvent, buyTicket, user, setIsAuthModalOpen, setIsVerificationModalOpen, setActiveNav } = useApp();
   const [quantity, setQuantity] = useState<number>(1);
   const [isPurchased, setIsPurchased] = useState<boolean>(false);
 
@@ -46,6 +47,11 @@ export const EventDetailModal: React.FC = () => {
   const handleBuy = () => {
     if (!user.isLoggedIn) {
       setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (!user.isVerified) {
+      setIsVerificationModalOpen(true);
       return;
     }
 
@@ -260,8 +266,8 @@ export const EventDetailModal: React.FC = () => {
                 <Typography variant="caption" color="text.secondary">
                   Event Host
                 </Typography>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  {selectedEvent.hostName}
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center' }}>
+                  {selectedEvent.hostName} <VerifiedBadge title="Verified Event Host" />
                 </Typography>
               </Box>
               <Chip icon={<VerifiedIcon />} label="Verified Host" size="small" color="info" variant="outlined" />

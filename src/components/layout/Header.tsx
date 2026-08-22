@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp, useDebouncedCallback } from '../../hooks';
 import { HeaderProps } from '../../types';
+import { VerifiedBadge } from '../common/VerifiedBadge';
 import {
   AppBar,
   Toolbar,
@@ -26,8 +27,6 @@ import {
   Logout as LogoutIcon,
   Menu as MenuIcon,
 } from '@mui/icons-material';
-
-
 
 export const Header: React.FC<HeaderProps> = ({
   sidebarCollapsed,
@@ -111,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </InputAdornment>
               ),
               sx: {
-                borderRadius: '6px', // Reduced border radius
+                borderRadius: '6px',
                 fontSize: '0.88rem',
               },
             }}
@@ -210,8 +209,8 @@ export const Header: React.FC<HeaderProps> = ({
             }}
           >
             <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider', mb: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {user.name}
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center' }}>
+                {user.name} {user.isVerified && <VerifiedBadge />}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {user.email}

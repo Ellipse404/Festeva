@@ -29,6 +29,12 @@ export interface BadgeProps {
   paid?: boolean;
 }
 
+export interface VerifiedBadgeProps {
+  size?: number;
+  title?: string;
+  className?: string;
+}
+
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'host' | 'attend' | 'chip' | 'social' | 'close';
   children: React.ReactNode;

@@ -9,5 +9,6 @@ export * from './api';
 export * from './hooks';
 export * from './categories';
 export * from './context';
+export * from './verification';
 
 export type NavView = 'dashboard' | 'host' | 'attend' | 'settings';

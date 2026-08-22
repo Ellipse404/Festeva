@@ -15,6 +15,8 @@ export interface UserProfile {
   avatar: string;
   location?: string;
   isLoggedIn: boolean;
+  isVerified?: boolean;
+  aadhaarNumber?: string;
   provider?: AuthProvider;
   providerId?: string;
   accessToken?: string;

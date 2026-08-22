@@ -4,7 +4,6 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-  useCallback,
 } from "react";
 import {
   EventItem,
@@ -16,9 +15,9 @@ import {
   SocialProvider,
   AuthProvider,
 } from "../types";
-import { INITIAL_MOCK_EVENTS } from "../data/mockEvents";
 import { eventsApi } from "../api/eventsApi";
 import { authApi } from "../api/authApi";
+import { verificationApi } from "../api/verificationApi";
 import { MESSAGES } from "../constants";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -30,6 +29,7 @@ const DEFAULT_USER: UserProfile = {
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
   location: "Downtown City Center",
   isLoggedIn: false,
+  isVerified: false,
   provider: "email",
 };
 
@@ -107,6 +107,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     "login" | "register" | "forgot"
   >("login");
 
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
+
   useEffect(() => {
     localStorage.setItem("festeva_user", JSON.stringify(user));
   }, [user]);
@@ -124,6 +126,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       avatar: userData.avatar || DEFAULT_USER.avatar,
       provider: userData.provider || "email",
       isLoggedIn: true,
+      isVerified: Boolean(userData.isVerified),
+      aadhaarNumber: userData.aadhaarNumber,
       accessToken,
     };
     setUser(updatedUser);
@@ -194,6 +198,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   const updateUserProfile = (updates: Partial<UserProfile>) => {
     setUser((prev) => ({ ...prev, ...updates }));
     toast.success(MESSAGES.TOAST.PROFILE_SAVED);
+  };
+
+  const verifyUserIdentity = async (aadhaarBase64: string, selfieBase64: string) => {
+    const res = await verificationApi.verifyIdentity(aadhaarBase64, selfieBase64, user.email, user.id);
+    if (res.isVerified) {
+      setUser((prev) => ({
+        ...prev,
+        isVerified: true,
+        aadhaarNumber: res.aadhaarNumber,
+      }));
+    }
   };
 
   const resetFilters = () => {
@@ -282,6 +297,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         setIsAuthModalOpen,
         authModalMode,
         setAuthModalMode,
+        isVerificationModalOpen,
+        setIsVerificationModalOpen,
+        verifyUserIdentity,
       }}
     >
       {children}

@@ -12,4 +12,5 @@ export const ENDPOINTS = {
   AUTH_GOOGLE: `${API_BASE_URL}/auth/google`,
   AUTH_FACEBOOK: `${API_BASE_URL}/auth/facebook`,
   AUTH_ME: `${API_BASE_URL}/auth/me`,
+  VERIFICATION_VERIFY: `${API_BASE_URL}/verification/verify-identity`,
 } as const;

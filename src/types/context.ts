@@ -60,4 +60,8 @@ export interface AppContextType {
   setIsAuthModalOpen: (open: boolean) => void;
   authModalMode: "login" | "register" | "forgot";
   setAuthModalMode: (mode: "login" | "register" | "forgot") => void;
+
+  isVerificationModalOpen: boolean;
+  setIsVerificationModalOpen: (open: boolean) => void;
+  verifyUserIdentity: (aadhaarBase64: string, selfieBase64: string) => Promise<void>;
 }
