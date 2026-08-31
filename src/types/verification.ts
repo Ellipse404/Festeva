@@ -21,7 +21,10 @@ export interface IOtpResponse {
   expiresInSec?: number;
   demoOtp?: string;
   isPhoneVerified?: boolean;
+  isEmailVerified?: boolean;
+  isVerified?: boolean;
   phoneNumber?: string;
+  email?: string;
 }
 
 export interface IIdentityVerificationModalProps {
