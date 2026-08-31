@@ -2,7 +2,7 @@ import { EventCategoryEnum, SortByEnum } from './common';
 
 export type EventCategory = 'all' | 'birthday' | 'reception' | 'rice_ceremony' | 'anniversary' | 'others';
 
-export interface EventItem {
+export interface IEventItem {
   id: string;
   title: string;
   category: Exclude<EventCategory, 'all'>;
@@ -22,7 +22,7 @@ export interface EventItem {
   createdAt: string;
 }
 
-export interface FilterOptions {
+export interface IFilterOptions {
   searchQuery: string;
   category: EventCategory;
   startDate: string;

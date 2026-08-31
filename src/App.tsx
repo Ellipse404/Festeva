@@ -9,6 +9,7 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { EventDetailModal } from './components/events/EventDetailModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { IdentityVerificationModal } from './components/verification/IdentityVerificationModal';
 import { AppRoutes } from './routes';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -50,11 +51,11 @@ const MainLayout: React.FC = () => {
         {/* Reusable Modals */}
         <EventDetailModal />
         <AuthModal />
+        <IdentityVerificationModal />
       </div>
     </ThemeProvider>
   );
 };
-
 
 const googleClientId =
   (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;

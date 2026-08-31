@@ -1,10 +1,10 @@
 import { axiosClient } from '../config';
-import { UserProfile, AuthResponse, SocialProvider } from '../types';
+import { IUserProfile, IAuthResponse, SocialProvider } from '../types';
+import { ENDPOINTS } from '../constants';
 
 export const authApi = {
-
-  async register(name: string, email: string, password: string): Promise<AuthResponse> {
-    const response = await axiosClient.post<AuthResponse>('/auth/register', {
+  async register(name: string, email: string, password: string): Promise<IAuthResponse> {
+    const response = await axiosClient.post<IAuthResponse>(ENDPOINTS.AUTH.REGISTER, {
       name,
       email,
       password,
@@ -12,15 +12,13 @@ export const authApi = {
     return response.data;
   },
 
-
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await axiosClient.post<AuthResponse>('/auth/login', {
+  async login(email: string, password: string): Promise<IAuthResponse> {
+    const response = await axiosClient.post<IAuthResponse>(ENDPOINTS.AUTH.LOGIN, {
       email,
       password,
     });
     return response.data;
   },
-
 
   async socialLogin(
     provider: SocialProvider,
@@ -28,8 +26,8 @@ export const authApi = {
     name: string,
     avatar?: string,
     providerId?: string,
-  ): Promise<AuthResponse> {
-    const response = await axiosClient.post<AuthResponse>('/auth/social-login', {
+  ): Promise<IAuthResponse> {
+    const response = await axiosClient.post<IAuthResponse>(ENDPOINTS.AUTH.SOCIAL_LOGIN, {
       provider,
       email,
       name,
@@ -39,25 +37,22 @@ export const authApi = {
     return response.data;
   },
 
- 
-  async googleLogin(idToken: string): Promise<AuthResponse> {
-    const response = await axiosClient.post<AuthResponse>('/auth/google', {
+  async googleLogin(idToken: string): Promise<IAuthResponse> {
+    const response = await axiosClient.post<IAuthResponse>(ENDPOINTS.AUTH.GOOGLE, {
       idToken,
     });
     return response.data;
   },
 
-
-  async facebookLogin(accessToken: string): Promise<AuthResponse> {
-    const response = await axiosClient.post<AuthResponse>('/auth/facebook', {
+  async facebookLogin(accessToken: string): Promise<IAuthResponse> {
+    const response = await axiosClient.post<IAuthResponse>(ENDPOINTS.AUTH.FACEBOOK, {
       accessToken,
     });
     return response.data;
   },
 
-  
-  async getProfile(): Promise<UserProfile> {
-    const response = await axiosClient.get<UserProfile>('/auth/me');
+  async getProfile(): Promise<IUserProfile> {
+    const response = await axiosClient.get<IUserProfile>(ENDPOINTS.AUTH.ME);
     return response.data;
   },
 };

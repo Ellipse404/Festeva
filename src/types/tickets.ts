@@ -1,4 +1,4 @@
-export interface Ticket {
+export interface ITicket {
   id: string;
   eventId: string;
   eventTitle: string;

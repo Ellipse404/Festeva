@@ -1,15 +1,25 @@
 /// <reference types="vite/client" />
 
-export const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3000';
+export const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export const ENDPOINTS = {
-  EVENTS: `${API_BASE_URL}/events`,
-  EVENT_BY_ID: (id: string) => `${API_BASE_URL}/events/${id}`,
-  EVENTS_NEARBY: `${API_BASE_URL}/events/nearby`,
-  AUTH_REGISTER: `${API_BASE_URL}/auth/register`,
-  AUTH_LOGIN: `${API_BASE_URL}/auth/login`,
-  AUTH_SOCIAL_LOGIN: `${API_BASE_URL}/auth/social-login`,
-  AUTH_GOOGLE: `${API_BASE_URL}/auth/google`,
-  AUTH_FACEBOOK: `${API_BASE_URL}/auth/facebook`,
-  AUTH_ME: `${API_BASE_URL}/auth/me`,
+  AUTH: {
+    REGISTER: '/auth/register',
+    LOGIN: '/auth/login',
+    SOCIAL_LOGIN: '/auth/social-login',
+    GOOGLE: '/auth/google',
+    FACEBOOK: '/auth/facebook',
+    ME: '/auth/me',
+  },
+  EVENTS: {
+    BASE: '/events',
+    BY_ID: (id: string) => `/events/${id}`,
+    NEARBY: '/events/nearby',
+  },
+  VERIFICATION: {
+    VERIFY: '/verification/verify-identity',
+    SEND_OTP: '/verification/send-otp',
+    VERIFY_OTP: '/verification/verify-otp',
+  },
 } as const;

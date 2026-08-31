@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../hooks/useApp';
-import { AuthFormProps, AuthMode, SocialProvider, SocialProviderEnum } from '../../types';
+import { IAuthFormProps, AuthMode, SocialProvider, SocialProviderEnum } from '../../types';
 import { useGoogleLogin } from '@react-oauth/google';
 import {
   Box,
@@ -84,7 +84,7 @@ const textFieldStyle = {
   },
 };
 
-export const AuthForm: React.FC<AuthFormProps> = ({
+export const AuthForm: React.FC<IAuthFormProps> = ({
   onSuccess,
   initialMode,
 }) => {

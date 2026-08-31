@@ -4,25 +4,25 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-  useCallback,
 } from "react";
 import {
-  EventItem,
-  Ticket,
-  UserProfile,
-  FilterOptions,
+  IEventItem,
+  ITicket,
+  IUserProfile,
+  IFilterOptions,
   NavView,
-  AppContextType,
+  IAppContextType,
   SocialProvider,
   AuthProvider,
 } from "../types";
-import { INITIAL_MOCK_EVENTS } from "../data/mockEvents";
 import { eventsApi } from "../api/eventsApi";
 import { authApi } from "../api/authApi";
+import { verificationApi } from "../api/verificationApi";
 import { MESSAGES } from "../constants";
+import { storage } from "../utils";
 import toast, { Toaster } from "react-hot-toast";
 
-const DEFAULT_USER: UserProfile = {
+const DEFAULT_USER: IUserProfile = {
   id: "usr-guest-123",
   name: "Alex Morgan",
   email: "alex.morgan@example.com",
@@ -30,10 +30,11 @@ const DEFAULT_USER: UserProfile = {
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
   location: "Downtown City Center",
   isLoggedIn: false,
+  isVerified: false,
   provider: "email",
 };
 
-const DEFAULT_FILTERS: FilterOptions = {
+const DEFAULT_FILTERS: IFilterOptions = {
   searchQuery: "",
   category: "all",
   startDate: "",
@@ -42,14 +43,14 @@ const DEFAULT_FILTERS: FilterOptions = {
   sortBy: "distance",
 };
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<IAppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   // Theme State (Light vs Dark)
   const [themeMode, setThemeMode] = useState<"light" | "dark">((): "light" | "dark" => {
-    const saved = localStorage.getItem("festeva_theme");
+    const saved = storage.get<string>("festeva_theme", "local");
     return (saved as "light" | "dark") || "dark";
   });
 
@@ -58,7 +59,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    localStorage.setItem("festeva_theme", themeMode);
+    storage.set("festeva_theme", themeMode, "local");
     if (themeMode === "dark") {
       document.documentElement.classList.add("dark");
     } else {
@@ -66,64 +67,75 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [themeMode]);
 
-  // User State
-  const [user, setUser] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem("festeva_user");
-    return saved ? JSON.parse(saved) : DEFAULT_USER;
+  // User State - Persisted across page refreshes
+  const [user, setUser] = useState<IUserProfile>(() => {
+    const savedUser = storage.get<IUserProfile>("festeva_user", "local");
+    const savedToken = storage.get<string>("festeva_token", "local");
+    if (savedUser && savedToken) {
+      return {
+        ...savedUser,
+        isLoggedIn: true,
+        accessToken: savedToken,
+      };
+    }
+    return savedUser || DEFAULT_USER;
   });
 
-  // Load User Profile from JWT token on initial load
+  // Revalidate User Profile from JWT token on initial load without logging out on transient errors
   useEffect(() => {
-    const token = localStorage.getItem("festeva_token");
+    const token = storage.get<string>("festeva_token", "local");
     if (token) {
       authApi
         .getProfile()
         .then((profile) => {
-          setUser({
+          setUser((prev) => ({
+            ...prev,
             ...profile,
             isLoggedIn: true,
             accessToken: token,
-          });
+          }));
         })
-        .catch(() => {
-          localStorage.removeItem("festeva_token");
-          setUser(DEFAULT_USER);
+        .catch((err) => {
+          console.warn("⚠️ Background profile sync notice:", err?.message || err);
         });
     }
   }, []);
 
   // Tickets State
-  const [tickets, setTickets] = useState<Ticket[]>(() => {
-    const saved = localStorage.getItem("festeva_tickets");
-    if (saved) return JSON.parse(saved);
-    return [];
+  const [tickets, setTickets] = useState<ITicket[]>(() => {
+    const saved = storage.get<ITicket[]>("festeva_tickets", "local");
+    return saved || [];
   });
 
   const [activeNav, setActiveNav] = useState<NavView>("dashboard");
-  const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const [filters, setFilters] = useState<IFilterOptions>(DEFAULT_FILTERS);
+  const [selectedEvent, setSelectedEvent] = useState<IEventItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<
     "login" | "register" | "forgot"
   >("login");
 
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
+
   useEffect(() => {
-    localStorage.setItem("festeva_user", JSON.stringify(user));
+    storage.set("festeva_user", user, "local");
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem("festeva_tickets", JSON.stringify(tickets));
+    storage.set("festeva_tickets", tickets, "local");
   }, [tickets]);
 
   const handleAuthSuccess = (accessToken: string, userData: any) => {
-    localStorage.setItem("festeva_token", accessToken);
-    const updatedUser: UserProfile = {
+    storage.set("festeva_token", accessToken, "local");
+    const updatedUser: IUserProfile = {
       id: userData.id,
       name: userData.name,
       email: userData.email,
       avatar: userData.avatar || DEFAULT_USER.avatar,
       provider: userData.provider || "email",
       isLoggedIn: true,
+      isVerified: Boolean(userData.isVerified),
+      aadhaarNumber: userData.aadhaarNumber,
       accessToken,
     };
     setUser(updatedUser);
@@ -181,7 +193,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const logout = () => {
-    localStorage.removeItem("festeva_token");
+    storage.remove("festeva_token", "local");
     setUser(DEFAULT_USER);
     toast.success(MESSAGES.TOAST.LOGOUT_SUCCESS, {
       style: {
@@ -191,9 +203,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  const updateUserProfile = (updates: Partial<UserProfile>) => {
+  const updateUserProfile = (updates: Partial<IUserProfile>) => {
     setUser((prev) => ({ ...prev, ...updates }));
     toast.success(MESSAGES.TOAST.PROFILE_SAVED);
+  };
+
+  const verifyUserIdentity = async (aadhaarBase64: string, selfieBase64: string) => {
+    const res = await verificationApi.verifyIdentity(aadhaarBase64, selfieBase64, user.email, user.id);
+    if (res.isVerified) {
+      setUser((prev) => ({
+        ...prev,
+        isVerified: true,
+        aadhaarNumber: res.aadhaarNumber,
+      }));
+    }
   };
 
   const resetFilters = () => {
@@ -203,7 +226,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   const addEvent = async (
     data: Omit<
-      EventItem,
+      IEventItem,
       | "id"
       | "createdAt"
       | "distanceKm"
@@ -211,7 +234,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       | "hostAvatar"
       | "hostEmail"
     >,
-  ): Promise<EventItem> => {
+  ): Promise<IEventItem> => {
     const fullPayload = {
       ...data,
       hostName: user.name,
@@ -225,14 +248,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     return newEvt;
   };
 
-  const buyTicket = (eventId: string, quantity: number, targetEvent?: EventItem | null): Ticket | null => {
+  const buyTicket = (eventId: string, quantity: number, targetEvent?: IEventItem | null): ITicket | null => {
     const target = targetEvent || selectedEvent;
     if (!target) {
       toast.error(MESSAGES.TOAST.TICKET_DETAILS_UNAVAILABLE);
       return null;
     }
 
-    const newTicket: Ticket = {
+    const newTicket: ITicket = {
       id: `tkt-${Date.now()}`,
       eventId: target.id,
       eventTitle: target.title,
@@ -282,6 +305,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         setIsAuthModalOpen,
         authModalMode,
         setAuthModalMode,
+        isVerificationModalOpen,
+        setIsVerificationModalOpen,
+        verifyUserIdentity,
       }}
     >
       {children}

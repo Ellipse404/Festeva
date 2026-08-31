@@ -27,7 +27,7 @@ import { MESSAGES, HOST_CATEGORIES, PRESET_POSTERS } from "../../constants";
 import toast from "react-hot-toast";
 
 export const HostEventForm: React.FC = () => {
-  const { addEvent, setActiveNav, user, setIsAuthModalOpen } = useApp();
+  const { addEvent, setActiveNav, user, setIsAuthModalOpen, setIsVerificationModalOpen } = useApp();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] =
@@ -48,6 +48,11 @@ export const HostEventForm: React.FC = () => {
 
     if (!user.isLoggedIn) {
       setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (!user.isVerified) {
+      setIsVerificationModalOpen(true);
       return;
     }
 

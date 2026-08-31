@@ -1,14 +1,12 @@
-import { EventItem, FilterOptions, ApiFetchResult } from "../types";
-import { MESSAGES } from "../constants";
+import { IEventItem, IFilterOptions, IApiFetchResult } from "../types";
+import { MESSAGES, ENDPOINTS } from "../constants";
 import { axiosClient } from "../config";
 
 export const eventsApi = {
-  /**
-   * Fetch all events directly from Nest backend via GET /events
-   */
+
   async getEvents(
-    filters?: FilterOptions,
-  ): Promise<ApiFetchResult<EventItem[]>> {
+    filters?: IFilterOptions,
+  ): Promise<IApiFetchResult<IEventItem[]>> {
     try {
       const params: Record<string, string> = {};
       if (filters?.category && filters.category !== "all") {
@@ -18,7 +16,7 @@ export const eventsApi = {
         params.searchQuery = filters.searchQuery;
       }
 
-      const response = await axiosClient.get<EventItem[]>("/events", { params });
+      const response = await axiosClient.get<IEventItem[]>(ENDPOINTS.EVENTS.BASE, { params });
       return { data: Array.isArray(response.data) ? response.data : [], isConnected: true };
     } catch (err: any) {
       console.error("❌ Nest Axios API fetch failed:", err?.message || err);
@@ -34,8 +32,8 @@ export const eventsApi = {
    * Create a new event directly on Nest backend via POST /events
    */
   async createEvent(
-    eventData: Omit<EventItem, "id" | "createdAt" | "distanceKm">,
-  ): Promise<ApiFetchResult<EventItem>> {
+    eventData: Omit<IEventItem, "id" | "createdAt" | "distanceKm">,
+  ): Promise<IApiFetchResult<IEventItem>> {
     const payload = {
       title: eventData.title,
       category: eventData.category,
@@ -55,15 +53,15 @@ export const eventsApi = {
       longitude: (eventData as any).longitude ?? 77.5946,
     };
 
-    const response = await axiosClient.post<EventItem>("/events", payload);
+    const response = await axiosClient.post<IEventItem>(ENDPOINTS.EVENTS.BASE, payload);
     return { data: response.data, isConnected: true };
   },
 
   /**
    * Fetch single event details by ID
    */
-  async getEventById(id: string): Promise<ApiFetchResult<EventItem | null>> {
-    const response = await axiosClient.get<EventItem>(`/events/${id}`);
+  async getEventById(id: string): Promise<IApiFetchResult<IEventItem | null>> {
+    const response = await axiosClient.get<IEventItem>(ENDPOINTS.EVENTS.BY_ID(id));
     return { data: response.data, isConnected: true };
   },
 };

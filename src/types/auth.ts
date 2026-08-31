@@ -1,6 +1,6 @@
 import { SocialProvider, AuthMode } from './user';
 
-export interface AuthResponse {
+export interface IAuthResponse {
   accessToken: string;
   user: {
     id: string;
@@ -10,10 +10,12 @@ export interface AuthResponse {
     provider?: string;
     role?: string;
     createdAt?: string;
+    isVerified?: boolean;
+    aadhaarNumber?: string;
   };
 }
 
-export interface AuthFormProps {
+export interface IAuthFormProps {
   isModal?: boolean;
   onSuccess?: () => void;
   initialMode?: AuthMode;
