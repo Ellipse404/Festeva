@@ -19,5 +19,7 @@ export const ENDPOINTS = {
   },
   VERIFICATION: {
     VERIFY: '/verification/verify-identity',
+    SEND_OTP: '/verification/send-otp',
+    VERIFY_OTP: '/verification/verify-otp',
   },
 } as const;

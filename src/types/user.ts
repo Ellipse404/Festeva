@@ -16,6 +16,8 @@ export interface IUserProfile {
   location?: string;
   isLoggedIn: boolean;
   isVerified?: boolean;
+  isPhoneVerified?: boolean;
+  phoneNumber?: string;
   aadhaarNumber?: string;
   provider?: AuthProvider;
   providerId?: string;

@@ -67,28 +67,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [themeMode]);
 
-  // User State
+  // User State - Persisted across page refreshes
   const [user, setUser] = useState<IUserProfile>(() => {
-    const saved = storage.get<IUserProfile>("festeva_user", "local");
-    return saved || DEFAULT_USER;
+    const savedUser = storage.get<IUserProfile>("festeva_user", "local");
+    const savedToken = storage.get<string>("festeva_token", "local");
+    if (savedUser && savedToken) {
+      return {
+        ...savedUser,
+        isLoggedIn: true,
+        accessToken: savedToken,
+      };
+    }
+    return savedUser || DEFAULT_USER;
   });
 
-  // Load User Profile from JWT token on initial load
+  // Revalidate User Profile from JWT token on initial load without logging out on transient errors
   useEffect(() => {
     const token = storage.get<string>("festeva_token", "local");
     if (token) {
       authApi
         .getProfile()
         .then((profile) => {
-          setUser({
+          setUser((prev) => ({
+            ...prev,
             ...profile,
             isLoggedIn: true,
             accessToken: token,
-          });
+          }));
         })
-        .catch(() => {
-          storage.remove("festeva_token", "local");
-          setUser(DEFAULT_USER);
+        .catch((err) => {
+          console.warn("⚠️ Background profile sync notice:", err?.message || err);
         });
     }
   }, []);

@@ -14,7 +14,11 @@ axiosClient.interceptors.request.use(
   (config) => {
     const token = storage.get<string>('festeva_token', 'local');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        (config.headers as any)['Authorization'] = `Bearer ${token}`;
+      }
     }
     return config;
   },

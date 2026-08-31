@@ -15,6 +15,15 @@ export interface IVerificationResponse {
   details?: IVerificationDetails;
 }
 
+export interface IOtpResponse {
+  success: boolean;
+  message: string;
+  expiresInSec?: number;
+  demoOtp?: string;
+  isPhoneVerified?: boolean;
+  phoneNumber?: string;
+}
+
 export interface IIdentityVerificationModalProps {
   open?: boolean;
   onClose?: () => void;
