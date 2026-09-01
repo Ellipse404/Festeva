@@ -18,6 +18,7 @@ export interface IVerificationResponse {
 export interface IOtpResponse {
   success: boolean;
   message: string;
+  sent?: boolean;
   expiresInSec?: number;
   demoOtp?: string;
   isPhoneVerified?: boolean;

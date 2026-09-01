@@ -240,11 +240,19 @@ export const IdentityVerificationModal: React.FC<IIdentityVerificationModalProps
 
     setIsSendingEmailOtp(true);
     try {
-      await verificationApi.sendEmailOtp(emailAddress);
+      const res = await verificationApi.sendEmailOtp(emailAddress);
       setEmailOtpSent(true);
       setEmailOtp('');
       setEmailCountdown(60);
-      toast.success(MESSAGES.TOAST.EMAIL_OTP_SENT(emailAddress));
+      
+      if (res.sent) {
+        toast.success(`Verification OTP sent to ${emailAddress}! Please check your inbox.`);
+      } else {
+        toast.error(
+          res.message || 'Resend API key issue. OTP logged in server terminal.',
+          { duration: 7000 }
+        );
+      }
     } catch (err: any) {
       toast.error(err?.message || 'Failed to send Email OTP. Please check email address.');
     } finally {
