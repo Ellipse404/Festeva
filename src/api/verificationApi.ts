@@ -31,6 +31,32 @@ export const verificationApi = {
   },
 
   /**
+   * Send 6-digit OTP to user email address via Resend
+   */
+  async sendEmailOtp(email: string): Promise<IOtpResponse> {
+    const response = await axiosClient.post<IOtpResponse>(
+      ENDPOINTS.VERIFICATION.SEND_EMAIL_OTP,
+      { email },
+    );
+    return response.data;
+  },
+
+  /**
+   * Verify 6-digit Email OTP entered by user
+   */
+  async verifyEmailOtp(
+    email: string,
+    otp: string,
+    userId?: string,
+  ): Promise<IOtpResponse> {
+    const response = await axiosClient.post<IOtpResponse>(
+      ENDPOINTS.VERIFICATION.VERIFY_EMAIL_OTP,
+      { email, otp, userId },
+    );
+    return response.data;
+  },
+
+  /**
    * Verify identity by uploading Aadhaar Card image and Live Selfie image
    */
   async verifyIdentity(
