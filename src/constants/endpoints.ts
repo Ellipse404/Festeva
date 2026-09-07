@@ -24,4 +24,9 @@ export const ENDPOINTS = {
     SEND_EMAIL_OTP: '/verification/send-email-otp',
     VERIFY_EMAIL_OTP: '/verification/verify-email-otp',
   },
+  PAYMENTS: {
+    CREATE_ORDER: '/payments/create-order',
+    VERIFY: '/payments/verify-payment',
+    MY_TICKETS: '/payments/my-tickets',
+  },
 } as const;
