@@ -10,5 +10,6 @@ export * from './hooks';
 export * from './categories';
 export * from './context';
 export * from './verification';
+export * from './payments';
 
 export type NavView = 'dashboard' | 'host' | 'attend' | 'settings';
