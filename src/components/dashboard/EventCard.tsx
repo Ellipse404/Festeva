@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
-import { EventCardProps } from '../../types';
+import { IEventCardProps } from '../../types';
 import { formatDate, formatCurrency, formatCategoryLabel } from '../../utils/formatters';
 import { formatDistance } from '../../utils/distance';
 import {
@@ -20,7 +20,7 @@ import {
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
 
-export const EventCard: React.FC<EventCardProps> = ({ event }) => {
+export const EventCard: React.FC<IEventCardProps> = ({ event }) => {
   const { setSelectedEvent } = useApp();
 
   const formattedDate = formatDate(event.date);
@@ -28,139 +28,61 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   return (
     <Card
       elevation={2}
-      sx={{
-        borderRadius: '8px', // Reduced crisp border radius
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          borderColor: 'primary.main',
-          boxShadow: '0 10px 24px rgba(99, 102, 241, 0.2)',
-        },
-      }}
+      className="h-full flex flex-col rounded-3xl overflow-hidden border border-white/10 bg-slate-900/60 backdrop-blur-md hover:border-purple-500/50 hover:shadow-2xl transition-all duration-300 group"
     >
-      {/* Poster Media & Badges Overlay */}
-      <Box sx={{ position: 'relative', height: 180, width: '100%', overflow: 'hidden' }}>
+      <div className="relative overflow-hidden aspect-video">
         <CardMedia
           component="img"
-          height="180"
           image={event.posterUrl}
           alt={event.title}
-          sx={{ transition: 'transform 0.4s ease', '&:hover': { transform: 'scale(1.06)' } }}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(9,13,22,0) 0%, rgba(9,13,22,0.85) 100%)',
-          }}
-        />
+        <div className="absolute top-3 right-3">
+          <Chip
+            label={formatCategoryLabel(event.category)}
+            size="small"
+            className="bg-purple-600/90 text-white font-bold text-xs backdrop-blur-md shadow-md"
+          />
+        </div>
+      </div>
 
-        {/* Distance Badge */}
-        <Chip
-          icon={<LocationIcon sx={{ fontSize: '13px !important', color: '#06b6d4' }} />}
-          label={formatDistance(event.distanceKm)}
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            backgroundColor: 'rgba(9, 13, 22, 0.85)',
-            backdropFilter: 'blur(8px)',
-            color: '#06b6d4',
-            fontWeight: 700,
-            fontSize: '0.72rem',
-            borderRadius: '4px',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-          }}
-        />
-
-        {/* Category Tag */}
-        <Chip
-          label={formatCategoryLabel(event.category)}
-          size="small"
-          color="secondary"
-          sx={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            fontWeight: 700,
-            fontSize: '0.72rem',
-            borderRadius: '4px',
-            textTransform: 'capitalize',
-          }}
-        />
-      </Box>
-
-      {/* Card Content */}
-      <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1.2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: '1.05rem' }}>
+      <CardContent className="flex-1 p-5">
+        <Typography variant="h6" className="font-extrabold text-white mb-2 line-clamp-2">
           {event.title}
         </Typography>
 
-        <Stack spacing={0.5} sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>
-          <Stack direction="row" alignItems="center" spacing={0.8}>
-            <CalendarIcon fontSize="small" sx={{ color: 'primary.main', fontSize: 16 }} />
-            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.85rem' }}>
-              {formattedDate} • {event.time}
-            </Typography>
-          </Stack>
+        <Typography variant="body2" className="text-slate-400 mb-4 line-clamp-2">
+          {event.description}
+        </Typography>
 
-          <Stack direction="row" alignItems="center" spacing={0.8}>
-            <LocationIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: 16 }} />
-            <Typography variant="body2" noWrap sx={{ fontWeight: 500, fontSize: '0.85rem' }}>
-              {event.locationName}
-            </Typography>
-          </Stack>
-        </Stack>
+        <Stack spacing={1.5} className="text-slate-300">
+          <div className="flex items-center gap-2 text-sm text-purple-300 font-medium">
+            <CalendarIcon style={{ fontSize: 18 }} />
+            <span>{formattedDate} • {event.time}</span>
+          </div>
 
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 'auto', pt: 1 }}>
-          <Avatar src={event.hostAvatar} alt={event.hostName} sx={{ width: 24, height: 24 }} />
-          <Typography variant="caption" color="text.secondary">
-            Hosted by <strong>{event.hostName}</strong>
-          </Typography>
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <LocationIcon style={{ fontSize: 18, color: '#ec4899' }} />
+            <span className="truncate">{event.locationName} ({formatDistance(event.distanceKm)})</span>
+          </div>
         </Stack>
       </CardContent>
 
-      {/* Card Actions Footer */}
-      <CardActions
-        sx={{
-          px: 2,
-          py: 1.2,
-          borderTop: 1,
-          borderColor: 'divider',
-          justifyContent: 'space-between',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(248, 250, 252, 0.8)',
-        }}
-      >
-        <Box>
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.72rem' }}>
-            Ticket Price
+      <CardActions className="p-5 pt-0 flex justify-between items-center border-t border-white/5 mt-auto">
+        <div className="flex items-center gap-2">
+          <Avatar src={event.hostAvatar} alt={event.hostName} sx={{ width: 28, height: 28 }} />
+          <Typography variant="caption" className="text-slate-400 font-semibold truncate max-w-[120px]">
+            {event.hostName}
           </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 800,
-              fontSize: '1rem',
-              color: event.ticketPrice === 0 ? 'success.main' : 'secondary.main',
-            }}
-          >
-            {formatCurrency(event.ticketPrice)}
-          </Typography>
-        </Box>
+        </div>
 
         <Button
           variant="contained"
           size="small"
-          color="primary"
           onClick={() => setSelectedEvent(event)}
-          sx={{ borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem' }}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl capitalize"
         >
-          View & Buy
+          {event.ticketPrice > 0 ? formatCurrency(event.ticketPrice) : 'Free Attend'}
         </Button>
       </CardActions>
     </Card>

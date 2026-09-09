@@ -1,8 +1,35 @@
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useApp } from './useApp';
-import { sortEventsByDistance } from '../utils/distance';
+import { eventsApi } from '../api/eventsApi';
+import { useDebounce } from './useDebounce';
 
 export const useEvents = () => {
-  const { events, addEvent, filters, setFilters, resetFilters } = useApp();
+  const { filters, setFilters, resetFilters, addEvent } = useApp();
+
+  // Debounce search query to prevent excessive API calls while user types
+  const debouncedSearchQuery = useDebounce(filters.searchQuery, 350);
+
+  const activeFilters = useMemo(
+    () => ({ ...filters, searchQuery: debouncedSearchQuery }),
+    [filters, debouncedSearchQuery],
+  );
+
+  // TanStack Query for fetching events with caching and background refetching
+  const {
+    data: apiResult,
+    isLoading: isLoadingEvents,
+    error: queryError,
+    refetch: fetchEvents,
+  } = useQuery({
+    queryKey: ['events', activeFilters.category, activeFilters.searchQuery],
+    queryFn: () => eventsApi.getEvents(activeFilters),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const events = apiResult?.data || [];
+  const isApiConnected = apiResult?.isConnected ?? false;
+  const apiError = apiResult?.error || (queryError ? String(queryError) : null);
 
   // Filter logic
   const filteredEvents = events.filter((evt) => {
@@ -35,9 +62,14 @@ export const useEvents = () => {
   return {
     events: sortedEvents,
     rawEvents: events,
+    isLoadingEvents,
+    isApiConnected,
+    apiError,
+    fetchEvents,
     addEvent,
     filters,
     setFilters,
     resetFilters,
   };
 };
+

@@ -1,4 +1,5 @@
 import React from 'react';
+import { DashboardPage } from '../pages/DashboardPage';
 import { HostEventPage } from '../pages/HostEventPage';
 import { AttendEventPage } from '../pages/AttendEventPage';
 import { SettingsPage } from '../pages/SettingsPage';
@@ -10,6 +11,11 @@ export interface PrivateRouteConfig {
 }
 
 export const privateRoutes: PrivateRouteConfig[] = [
+  {
+    path: 'dashboard',
+    component: DashboardPage,
+    requiresAuth: true,
+  },
   {
     path: 'host',
     component: HostEventPage,

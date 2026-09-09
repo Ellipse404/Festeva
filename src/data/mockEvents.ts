@@ -1,6 +1,6 @@
-import { EventItem } from '../types';
+import { IEventItem } from '../types';
 
-export const INITIAL_MOCK_EVENTS: EventItem[] = [
+export const INITIAL_MOCK_EVENTS: IEventItem[] = [
   {
     id: 'evt-1',
     title: 'Aarav & Priya Grand Wedding Reception',

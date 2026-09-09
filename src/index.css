@@ -18,7 +18,7 @@
   background: rgba(99, 102, 241, 0.6);
 }
 
-/* App Layout Grid & Spacing - Tightened alignment between sidebar and body */
+/* App Layout Grid & Dynamic Sidebar Spacing */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -34,23 +34,29 @@
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.main-wrapper.collapsed {
-  margin-left: 72px;
+@media (min-width: 900px) {
+  .main-wrapper {
+    margin-left: 256px; /* Expanded sidebar width */
+  }
+  .main-wrapper.collapsed {
+    margin-left: 80px; /* Collapsed icon-only sidebar width */
+  }
 }
 
 @media (max-width: 899px) {
-  .main-wrapper {
+  .main-wrapper,
+  .main-wrapper.collapsed {
     margin-left: 0 !important;
   }
 }
 
 .content-body {
   flex: 1;
-  padding: 1.25rem 1.5rem; /* Tightened padding for clean gapless transition */
+  padding: 1.25rem 1.5rem;
   margin-top: 68px;
   width: 100%;
   max-width: 1600px;
-  margin-left: 0; /* Keep content aligned directly to sidebar without centered gap */
+  margin-left: 0;
 }
 
 @media (max-width: 600px) {
